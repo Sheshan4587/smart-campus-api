@@ -23,6 +23,30 @@
             <version>${jakartaee}</version>
             <scope>provided</scope>
         </dependency>
+        
+        <!-- Servlet -->
+        <dependency> 
+            <groupId>org.glassfish.jersey.containers</groupId> 
+            <artifactId>jersey-container-servlet</artifactId> 
+            <version>2.32</version> 
+        </dependency> 
+        
+        <!-- Dependecncy Injection -->
+        <dependency> 
+            <groupId>org.glassfish.jersey.inject</groupId> 
+            <artifactId>jersey-hk2</artifactId> 
+            <version>2.32</version> 
+        </dependency>
+        
+        <!-- For JSON responses -->
+        <!-- Source: https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-json-jackson -->
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>2.32</version>
+            <scope>compile</scope>
+        </dependency>
+        
     </dependencies>
     
      <build>
@@ -42,7 +66,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.3</version>
+                <version>3.4.0</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>

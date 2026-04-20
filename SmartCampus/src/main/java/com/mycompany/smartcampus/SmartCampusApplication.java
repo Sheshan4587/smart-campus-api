@@ -4,7 +4,9 @@
  */
 package com.mycompany.smartcampus;
 
+import com.mycompany.smartcampus.exception.RoomNotEmptyExceptionMapper;
 import com.mycompany.smartcampus.resources.DiscoveryResource;
+import com.mycompany.smartcampus.resources.SensorRoomResource;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
@@ -24,7 +26,16 @@ public class SmartCampusApplication extends Application{
         
         // Declare anc initlize the HashSet
         Set<Class<?>> classes = new HashSet<>();
+        
+        
+        
+        //part 1
         classes.add(DiscoveryResource.class);
+        
+        //part 2 - Room Management
+        classes.add(SensorRoomResource.class);
+        classes.add(RoomNotEmptyExceptionMapper.class);
+        
         return classes;
     }
     

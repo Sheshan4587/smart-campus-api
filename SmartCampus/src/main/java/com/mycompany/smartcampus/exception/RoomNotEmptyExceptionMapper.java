@@ -19,7 +19,7 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class RoomNotEmptyExceptionMapper implements ExceptionMapper<RoomNotEmptyException>{
     
-     @Override
+    @Override
     public Response toResponse(RoomNotEmptyException ex) {
         // Build a simple JSON error body
         Map<String, String> err = new HashMap<>();

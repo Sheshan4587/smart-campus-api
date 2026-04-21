@@ -6,6 +6,7 @@ package com.mycompany.smartcampus;
 
 // Import the Room class from your model package.
 import com.mycompany.smartcampus.model.Room;
+import com.mycompany.smartcampus.model.Sensor;
 import java.util.Map;
 // Import ConcurrentHashMap (thread-safe Map implementation).
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,9 @@ public class DataStore {
     // Keys are Strings (like room IDs or names).
     // Values are Room objects.
     private final Map<String, Room> rooms = new ConcurrentHashMap<>();
+    
+    // In-memory storage for sensors (key = sensorId, value = Sensor)
+    private final Map<String, Sensor> sensors = new ConcurrentHashMap<>();
 
     private DataStore() {}
 
@@ -35,5 +39,9 @@ public class DataStore {
     // Getter method to access the rooms map to add, retrieve, or modify rooms.
     public Map<String, Room> getRooms() {
         return rooms;
+    }
+    
+    public Map<String, Sensor> getSensors(){
+        return sensors;
     }
 }

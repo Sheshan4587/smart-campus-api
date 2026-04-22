@@ -111,5 +111,20 @@ public class SensorResource {
 
         return Response.ok(sensor).build(); // 200 OK
     }
+    
+    // Sub-resource locator
+    // Delegates /sensors/{sensorId}/readings to SensorReadingResource
+    // No HTTP method annotation - JAX-RS uses this to resolve the class
+
+    @Path("/{sensorId}/readings")
+    public SensorReadingResource getReadingsResource(@PathParam("sensorId") String sensorId) {
+        // Check sensor exists first
+        Sensor sensor = store.getSensors().get(sensorId);
+        if (sensor == null) {
+            throw new javax.ws.rs.NotFoundException("Sensor '" + sensorId + "' not found.");
+        }
+        // Hand off to SensorReadingResource with the sensorId context
+        return new SensorReadingResource(sensorId, store);
+    }
 }
 

@@ -7,6 +7,8 @@ package com.mycompany.smartcampus;
 // Import the Room class from your model package.
 import com.mycompany.smartcampus.model.Room;
 import com.mycompany.smartcampus.model.Sensor;
+import com.mycompany.smartcampus.model.SensorReading;
+import java.util.List;
 import java.util.Map;
 // Import ConcurrentHashMap (thread-safe Map implementation).
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +30,9 @@ public class DataStore {
     
     // In-memory storage for sensors (key = sensorId, value = Sensor)
     private final Map<String, Sensor> sensors = new ConcurrentHashMap<>();
+    
+     // In-memory storage for readings (key = sensorId, value = list of readings)
+    private final Map<String, List<SensorReading>> readings = new ConcurrentHashMap<>();
 
     private DataStore() {}
 
@@ -43,5 +48,9 @@ public class DataStore {
     
     public Map<String, Sensor> getSensors(){
         return sensors;
+    }
+    
+    public Map<String, List<SensorReading>> getReadings(){
+        return readings;
     }
 }

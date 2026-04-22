@@ -19,12 +19,17 @@ public class SensorReading {
     // NoArgsConstructor
     public SensorReading() {
     }
-    
-    
 
     public SensorReading(UUID id, long timestamp, double value) {
         this.id = id;
         this.timestamp = timestamp;
+        this.value = value;
+    }
+
+    // Auto-generate id and timestamp - used when saving a new reading
+    public SensorReading(double value) {
+        this.id = UUID.randomUUID();
+        this.timestamp = System.currentTimeMillis();
         this.value = value;
     }
 
@@ -51,7 +56,5 @@ public class SensorReading {
     public void setValue(double value) {
         this.value = value;
     }
-    
-    
 
 }

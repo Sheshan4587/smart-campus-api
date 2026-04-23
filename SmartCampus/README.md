@@ -16,7 +16,7 @@ This project is a RESTful API built using JAX-RS to manage a Smart Campus system
 
 ## How to Run
 1. Clone the repository
-    bashgit clone https://github.com/YOUR_USERNAME/smart-campus-api.git
+    bashgit clone https://github.com/Sheshan4587/smart-campus-api
 2. Open in NetBeans
 
 File → Open Project → select the SmartCampus folder

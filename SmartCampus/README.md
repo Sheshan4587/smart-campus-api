@@ -3,8 +3,7 @@
 ## Overview
 This project is a RESTful API built using JAX-RS to manage a Smart Campus system. It handles the management of rooms, sensors (e.g., CO2, Temperature), and records sensor readings using an in-memory, thread-safe data store.
 
-## Video Demonstration 🎥
-**[Click here to watch the Video Demonstration](https://drive.google.com/drive/folders/1BbMvneV9fIYu3Mruv91OUDABxk436JRFE)**
+## Video Demonstration: https://drive.google.com/drive/folders/1BbMvneV9fIYu3Mruv91OUDABxk436JRF
 
 ## GitHub Link: https://github.com/Sheshan4587/smart-campus-api
 

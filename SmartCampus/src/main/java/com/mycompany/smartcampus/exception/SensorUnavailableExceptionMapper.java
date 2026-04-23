@@ -9,28 +9,28 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-
 /**
  *
  * @author sheshan
  */
+// Catches SensorUnavailableException and returns 403
 @Provider
-public class RoomNotEmptyExceptionMapper implements ExceptionMapper<RoomNotEmptyException>{
-    
+public class SensorUnavailableExceptionMapper implements ExceptionMapper<SensorUnavailableException>{
+
     @Override
-    public Response toResponse(RoomNotEmptyException exception) {
+    public Response toResponse(SensorUnavailableException exception) {
         
         // Create an instance of ErrorMessage class
         ErrorMessage errorMessage = new ErrorMessage(
             exception.getMessage(),
-            409,
-            "Room is not empty. Cannot delete the room!"
+            403,
+            "State Constraint Violation. Sensors in MAINTENANCE mode cannot accept new readings."
         );
         
         // Build the response entity
-        return Response.status(Response.Status.CONFLICT)
+        return Response.status(Response.Status.FORBIDDEN)
                 .entity(errorMessage)
                 .build();
     }
-    
+
 }

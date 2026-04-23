@@ -5,14 +5,14 @@
 package com.mycompany.smartcampus;
 
 // Import the Room class from your model package.
+import com.mycompany.smartcampus.dao.GenericDAO;
 import com.mycompany.smartcampus.model.Room;
 import com.mycompany.smartcampus.model.Sensor;
 import com.mycompany.smartcampus.model.SensorReading;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-// Import ConcurrentHashMap (thread-safe Map implementation).
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  *
  * @author sheshan
@@ -25,29 +25,25 @@ public class DataStore {
 
     // Define a thread-safe Map to store rooms.
     // Keys are Strings (like room IDs or names).
-    // Values are Room objects.
-    private final Map<String, Room> rooms = new ConcurrentHashMap<>();
+    // Values are Room objects.    
+    private final Map<String, Room> rooms = Collections.synchronizedMap(new HashMap<>());
     
     // In-memory storage for sensors (key = sensorId, value = Sensor)
-    private final Map<String, Sensor> sensors = new ConcurrentHashMap<>();
+    private final Map<String, Sensor> sensors = Collections.synchronizedMap(new HashMap<>());    
     
-     // In-memory storage for readings (key = sensorId, value = list of readings)
-    private final Map<String, List<SensorReading>> readings = new ConcurrentHashMap<>();
+    // In-memory storage for readings (key = sensorId, value = list of readings)
+    private final Map<String, List<SensorReading>> readings = Collections.synchronizedMap(new HashMap<>());
+    
+    
+    //public dao
+    public final GenericDAO<Room> roomDAO = new GenericDAO<>(rooms);
+    public final GenericDAO<Sensor> sensorDAO = new GenericDAO<>(sensors);
 
     private DataStore() {}
 
     // Public method to access the single DataStore instance.
     public static DataStore getInstance() {
         return INSTANCE;
-    }
-
-    // Getter method to access the rooms map to add, retrieve, or modify rooms.
-    public Map<String, Room> getRooms() {
-        return rooms;
-    }
-    
-    public Map<String, Sensor> getSensors(){
-        return sensors;
     }
     
     public Map<String, List<SensorReading>> getReadings(){

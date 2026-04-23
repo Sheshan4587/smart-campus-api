@@ -5,12 +5,12 @@
 package com.mycompany.smartcampus.resources;
 
 import com.mycompany.smartcampus.DataStore;
+import com.mycompany.smartcampus.exception.SensorUnavailableException;
+import com.mycompany.smartcampus.model.ErrorMessage;
 import com.mycompany.smartcampus.model.Sensor;
 import com.mycompany.smartcampus.model.SensorReading;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -25,7 +25,7 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class SensorReadingResource {
-    
+
     private final String sensorId;
     private final DataStore store;
 
@@ -33,33 +33,51 @@ public class SensorReadingResource {
         this.sensorId = sensorId;
         this.store = store;
     }
-    
+
     // GET /api/v1/sensors/{sensorId}/readings
     // Returns full reading history for this sensor
     @GET
-    public Response getReadings(){
+    public Response getReadings() {
         List<SensorReading> history = store.getReadings().get(sensorId);
-        
+
         // If no readings exist yet return empty list
         if (history == null) {
             return Response.ok(new ArrayList<>()).build(); // 200 OK
         }
 
         return Response.ok(history).build(); // 200 OK
-        
+
     }
-    
+
     // POST /api/v1/sensors/{sensorId}/readings
     // Appends a new reading for this sensor
     // Side effect: updates currentValue on the parent Sensor
     @POST
     public Response addReading(SensorReading reading) {
+        
+        // Get the sensor using the new DAO pattern
+        Sensor sensor = store.sensorDAO.getById(sensorId);
 
         // Validate reading body was provided
         if (reading == null) {
-            Map<String, String> err = new HashMap<>();
-            err.put("error", "Request body is required.");
-            return Response.status(Response.Status.BAD_REQUEST).entity(err).build(); // 400
+            ErrorMessage error = new ErrorMessage(
+                    "Request body is required.", 
+                    400, 
+                    "Please provide a valid SensorReading JSON payload."
+            );
+            
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_JSON) // Added the type here!
+                    .build(); 
+        }
+
+        // State constraint - MAINTENANCE sensors cannot accept readings
+        if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
+            // Throws the custom exception which triggers the 403 Mapper!
+            throw new SensorUnavailableException(
+                    "Sensor '" + sensorId + "' is under MAINTENANCE and cannot accept new readings."
+            );
         }
 
         // Build a new reading with auto generated id and timestamp
@@ -67,14 +85,13 @@ public class SensorReadingResource {
 
         // Add reading to history list, create list if first reading
         store.getReadings()
-             .computeIfAbsent(sensorId, k -> new ArrayList<>())
-             .add(saved);
+                .computeIfAbsent(sensorId, k -> new ArrayList<>())
+                .add(saved);
 
         // Side effect - update currentValue on the parent sensor
-        Sensor sensor = store.getSensors().get(sensorId);
         sensor.setCurrentValue(saved.getValue());
 
         return Response.status(Response.Status.CREATED).entity(saved).build(); // 201
     }
-    
+
 }

@@ -11,7 +11,7 @@ import java.util.ArrayList;
  *
  * @author sheshan
  */
-public class Room {
+public class Room implements BaseModel{
 
     private String id; // Unique identifier , e.g., "LIB -301"
     private String name; // Human -readable name , e.g., "Library Quiet Study"
@@ -30,11 +30,13 @@ public class Room {
         this.name = name;
         this.capacity = capacity;
     }
-
+    
+    @Override
     public String getId() {
         return id;
     }
-
+    
+    @Override
     public void setId(String id) {
         this.id = id;
     }
@@ -55,11 +57,11 @@ public class Room {
         this.capacity = capacity;
     }
 
-    public List getSensorIds() {
+    public  List<String> getSensorIds() {
         return sensorIds;
     }
 
-    public void setSensorIds(List sensorIds) {
+    public void setSensorIds(List<String> sensorIds) {
         this.sensorIds = sensorIds;
     }
     

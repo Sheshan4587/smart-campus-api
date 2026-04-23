@@ -6,17 +6,16 @@ package com.mycompany.smartcampus.resources;
 
 import com.mycompany.smartcampus.DataStore;
 import com.mycompany.smartcampus.exception.RoomNotEmptyException;
+import com.mycompany.smartcampus.model.ErrorMessage;
 import com.mycompany.smartcampus.model.Room;
+import com.mycompany.smartcampus.model.Sensor;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import java.util.List;
-import java.util.Map;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -30,12 +29,8 @@ public class SensorRoomResource {
 
     //get all rooms
     @GET
-    public Response getAllrooms() {
-
-        // GET /api/v1/rooms
-        // Returns a list of all rooms
-        List<Room> roomList = new ArrayList<>(store.getRooms().values());
-        return Response.ok(roomList).build(); //200 OK
+    public Response getAllRooms() {
+        return Response.ok(store.roomDAO.getAll()).build();
     }
 
     @POST
@@ -43,16 +38,30 @@ public class SensorRoomResource {
 
         // Check id was provided
         if (room == null || room.getId() == null || room.getId().isBlank()) {
-            Map<String, String> err = new HashMap<>();
-            err.put("error", "Field 'id' is required.");
-            return Response.status(Response.Status.BAD_REQUEST).entity(err).build(); // 400
+            ErrorMessage errorObj = new ErrorMessage(
+                    "Field 'id' is required.",
+                    400,
+                    "Please provide a valid Room JSON payload containing at least an 'id'."
+            );
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorObj)
+                    .type(MediaType.APPLICATION_JSON)
+                    .build(); // 400
         }
 
         // Check room doesn't already exist
-        if (store.getRooms().containsKey(room.getId())) {
-            Map<String, String> err = new HashMap<>();
-            err.put("error", "Room '" + room.getId() + "' already exists.");
-            return Response.status(Response.Status.CONFLICT).entity(err).build(); // 409
+        if (store.roomDAO.exists(room.getId())) {
+            ErrorMessage errorObj = new ErrorMessage(
+                    "Room '" + room.getId() + "' already exists.",
+                    409,
+                    "Room IDs must be unique. Please use a different ID or update the existing room."
+            );
+
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(errorObj)
+                    .type(MediaType.APPLICATION_JSON)
+                    .build(); // 409
         }
 
         // Make sure sensorIds list is not null
@@ -60,28 +69,36 @@ public class SensorRoomResource {
             room.setSensorIds(new ArrayList<>());
         }
 
-        // Save and return the created room
-        store.getRooms().put(room.getId(), room);
-        return Response.status(Response.Status.CREATED).entity(room).build(); // 201
+        // Save and return the created room using the DAO
+        store.roomDAO.save(room);
+
+        return Response.status(Response.Status.CREATED)
+                .entity(room)
+                .type(MediaType.APPLICATION_JSON)
+                .build(); // 201
     }
-    
+
     // GET /api/v1/rooms/{roomId}
     // Returns a specific room by its ID
     // --------------------------------------------------------- //
-
     @GET
     @Path("/{roomId}")
-    public Response getRoom(@PathParam("roomId") String roomId) {
-        Room room = store.getRooms().get(roomId);
-
-        // Return 404 if room not found
+    public Response getRoomById(@PathParam("roomId") String roomId) {
+        Room room = store.roomDAO.getById(roomId);
+        // Return a clean 404 error if room is not found
         if (room == null) {
-            Map<String, String> err = new HashMap<>();
-            err.put("error", "Room '" + roomId + "' not found.");
-            return Response.status(Response.Status.NOT_FOUND).entity(err).build(); // 404
+            ErrorMessage errorObj = new ErrorMessage(
+                    "Room not found.",
+                    404,
+                    "No room exists with the ID: " + roomId
+            );
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(errorObj)
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
         }
 
-        return Response.ok(room).build(); // 200 OK
+        return Response.ok(room).build();
     }
 
     // --------------------------------------------------------- //
@@ -90,25 +107,30 @@ public class SensorRoomResource {
     @DELETE
     @Path("/{roomId}")
     public Response deleteRoom(@PathParam("roomId") String roomId) {
-        Room room = store.getRooms().get(roomId);
-
-        // Return 404 if room doesn't exist
+        Room room = store.roomDAO.getById(roomId);
+        // Return a clean 404 error if room doesn't exist
         if (room == null) {
-            Map<String, String> err = new HashMap<>();
-            err.put("error", "Room '" + roomId + "' not found.");
-            return Response.status(Response.Status.NOT_FOUND).entity(err).build(); // 404
-        }
-
-        // Block deletion if room still has sensors assigned
-        if (room.getSensorIds() != null && !room.getSensorIds().isEmpty()) {
-            throw new RoomNotEmptyException(
-                    "Room '" + roomId + "' cannot be deleted: it still has "
-                    + room.getSensorIds().size() + " sensor(s) assigned. "
-                    + "Please remove all sensors first."
+            ErrorMessage errorObj = new ErrorMessage(
+                    "Room not found.",
+                    404,
+                    "Cannot delete a room that does not exist."
             );
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(errorObj)
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
         }
 
-        store.getRooms().remove(roomId);
+        // 409 Conflict check for active sensors
+        for (String sensorId : room.getSensorIds()) {
+            Sensor sensor = store.sensorDAO.getById(sensorId);
+            if (sensor != null && "ACTIVE".equalsIgnoreCase(sensor.getStatus())) {
+                // Throws Exception -> Exception Mapper catches it and formats to JSON!
+                throw new RoomNotEmptyException("Cannot delete: Room is currently occupied by active hardware.");
+            }
+        }
+
+        store.roomDAO.delete(roomId);
         return Response.noContent().build(); // 204 No Content
     }
 }

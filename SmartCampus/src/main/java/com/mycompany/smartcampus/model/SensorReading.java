@@ -10,34 +10,31 @@ import java.util.UUID;
  *
  * @author sheshan
  */
-public class SensorReading {
+public class SensorReading implements BaseModel{
 
-    private UUID id; // Unique reading event ID (UUID recommended)
+    private String id; // Unique reading event ID (UUID recommended)
     private long timestamp; // Epoch time (ms) when the reading was captured
     private double value; // The actual metric value recorded by the hardware
 
-    // NoArgsConstructor
+    
     public SensorReading() {
-    }
-
-    public SensorReading(UUID id, long timestamp, double value) {
-        this.id = id;
-        this.timestamp = timestamp;
-        this.value = value;
+        this.id = UUID.randomUUID().toString();
+        this.timestamp = System.currentTimeMillis();
     }
 
     // Auto-generate id and timestamp - used when saving a new reading
     public SensorReading(double value) {
-        this.id = UUID.randomUUID();
-        this.timestamp = System.currentTimeMillis();
+        this();
         this.value = value;
     }
-
-    public UUID getId() {
+    
+    @Override
+    public String getId() {
         return id;
     }
-
-    public void setId(UUID id) {
+    
+    @Override
+    public void setId(String id) {
         this.id = id;
     }
 
